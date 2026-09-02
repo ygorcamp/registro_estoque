@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exclusão de Registro de Estoque — Manual RMS Retail</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --amber: #d98e2c;
+    --amber-dim: #a56e22;
+    --teal: #1f5c57;
+    --teal-bright: #2d8a80;
+    --charcoal: #1b1d1f;
+    --charcoal-2: #232628;
+    --plate: #26292b;
+    --line: #3a3d3f;
+    --paper: #ece7dd;
+    --paper-dim: #b9b3a6;
+    --danger: #b8452f;
+  }
+
+  *{ box-sizing:border-box; }
+
+  body{
+    margin:0;
+    background:
+      repeating-linear-gradient(0deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 3px),
+      var(--charcoal);
+    color: var(--paper);
+    font-family:'IBM Plex Sans', sans-serif;
+    line-height:1.5;
+  }
+
+  .frame{
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+
+  header.masthead{
+    border: 2px solid var(--line);
+    background: var(--plate);
+    padding: 22px 24px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    margin-bottom: 28px;
+    position: relative;
+  }
+  header.masthead::before{
+    content:"";
+    position:absolute; inset:6px;
+    border:1px solid rgba(217,142,44,0.25);
+    pointer-events:none;
+  }
+  .masthead-id{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--amber);
+    letter-spacing: 0.08em;
+  }
+  .masthead-back{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--paper-dim);
+    text-decoration:none;
+    border:1px solid var(--line);
+    padding:6px 12px;
+  }
+  .masthead-back:hover{ border-color: var(--amber); color: var(--amber); }
+
+  h1.title{
+    font-family:'Big Shoulders Display', sans-serif;
+    font-weight:800;
+    font-size: clamp(32px, 5vw, 52px);
+    line-height:0.95;
+    margin: 0 0 6px;
+    color: var(--paper);
+    text-transform: uppercase;
+    letter-spacing: 0.01em;
+  }
+  .subtitle{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 13px;
+    color: var(--teal-bright);
+    margin: 0 0 32px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .plate{
+    background: var(--plate);
+    border: 1px solid var(--line);
+    padding: 22px 24px;
+    margin-bottom: 24px;
+    position: relative;
+  }
+  .plate-label{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    color: var(--paper-dim);
+    position:absolute;
+    top:-9px;
+    left:16px;
+    background: var(--charcoal);
+    padding: 0 8px;
+  }
+
+  .warn-plate{
+    border-left: 4px solid var(--danger);
+  }
+  .warn-plate .plate-label{ color: var(--danger); }
+
+  ul.rules{
+    margin:6px 0 0;
+    padding-left: 0;
+    list-style:none;
+  }
+  ul.rules li{
+    display:flex;
+    gap:12px;
+    padding: 10px 0;
+    border-bottom: 1px dashed rgba(255,255,255,0.08);
+    font-size: 15px;
+  }
+  ul.rules li:last-child{ border-bottom:none; }
+  ul.rules li .num{
+    font-family:'IBM Plex Mono', monospace;
+    color: var(--amber);
+    flex-shrink:0;
+    font-weight:600;
+  }
+
+  .separate-plate{
+    border-left: 4px solid var(--teal-bright);
+  }
+  .separate-plate .plate-label{ color: var(--teal-bright); }
+  .separate-list{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-top: 8px;
+  }
+  .separate-list span{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 14px;
+    border: 1px solid var(--teal-bright);
+    color: var(--teal-bright);
+    padding: 5px 12px;
+    background: rgba(45,138,128,0.08);
+  }
+
+  .section-heading{
+    font-family:'Big Shoulders Display', sans-serif;
+    font-weight:700;
+    font-size: 24px;
+    text-transform: uppercase;
+    color: var(--amber);
+    margin: 36px 0 14px;
+    display:flex;
+    align-items:baseline;
+    gap:10px;
+  }
+  .section-heading .count{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 13px;
+    color: var(--paper-dim);
+    text-transform:none;
+  }
+
+  .lojas-grid{
+    display:grid;
+    grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+    gap: 8px;
+  }
+  .loja-tag{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 14px;
+    font-weight:500;
+    text-align:center;
+    padding: 10px 4px;
+    background: var(--charcoal-2);
+    border: 1px solid var(--line);
+    color: var(--paper);
+    transition: border-color .15s, color .15s;
+  }
+  .loja-tag.separada{
+    border-color: var(--teal-bright);
+    color: var(--teal-bright);
+    background: rgba(45,138,128,0.06);
+  }
+
+  .legend{
+    display:flex;
+    gap:20px;
+    flex-wrap:wrap;
+    margin-top:16px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--paper-dim);
+  }
+  .legend .swatch{
+    display:inline-block;
+    width:10px; height:10px;
+    margin-right:6px;
+    vertical-align:middle;
+  }
+  .legend .swatch.normal{ background: var(--charcoal-2); border:1px solid var(--line); }
+  .legend .swatch.separada{ background: rgba(45,138,128,0.15); border:1px solid var(--teal-bright); }
+
+  footer.stamp{
+    margin-top: 48px;
+    padding-top: 18px;
+    border-top: 1px solid var(--line);
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--paper-dim);
+    letter-spacing: 0.05em;
+    display:flex;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+
+  @media (max-width: 520px){
+    header.masthead{ flex-direction:column; align-items:flex-start; }
+  }
+</style>
+</head>
+<body>
+<div class="frame">
+
+  <header class="masthead">
+    <div>
+      <div class="masthead-id">MANUAL RMS RETAIL </div>
+    </div>
+  </header>
+
+  <h1 class="title">Exclusão de Registro de Estoque</h1>
+  <p class="subtitle">RMS RETAIL · MERCADORIAS &gt; CADASTRO &gt; ESTOQUES &gt; ESTOQUE - MANUTENÇÃO E CONSULTA</p>
+
+  <div class="plate warn-plate">
+    <span class="plate-label">ATENÇÃO</span>
+    <ul class="rules">
+      <li><span class="num">01</span><span>Não rodar a exclusão de registro de estoque às terças e quartas-feiras.</span></li>
+      <li><span class="num">02</span><span>As filiais 201-1, 200-3, 213-5 e 203-8 devem ter a exclusão feita separadamente, uma de cada vez.</span></li>
+    </ul>
+  </div>
+
+  <div class="plate separate-plate">
+    <span class="plate-label">FILIAIS COM EXECUÇÃO SEPARADA</span>
+    <div class="separate-list">
+      <span>201-1</span>
+      <span>200-3</span>
+      <span>213-5</span>
+      <span>203-8</span>
+    </div>
+  </div>
+
+  <div class="section-heading">Lojas <span class="count">46 filiais</span></div>
+  <div class="lojas-grid" id="lojasGrid"></div>
+  <div class="legend">
+    <div><span class="swatch normal"></span>Execução no lote normal</div>
+    <div><span class="swatch separada"></span>Execução separada, uma de cada vez</div>
+  </div>
+
+  <footer class="stamp">
+    <span>Copyright ©2026 CPD MATRIZ — Todos os direitos reservados</span>
+    <span>FICHA 27 / 27</span>
+  </footer>
+
+</div>
+
+<script>
+  const lojas = ["1-9","2-7","3-5","4-3","5-1","6-0","7-8","8-6","9-4","10-8","11-6","12-4","15-9","17-5","18-3","19-1","21-3","22-1","24-8","27-2","28-0","29-9","30-2","31-0","32-9","33-7","34-5","35-3","36-1","37-0","38-8","39-6","40-0","41-8","42-6","43-4","44-2","47-7","48-5","50-7","54-0","55-8","201-1","200-3","213-5","203-8"];
+  const separadas = new Set(["201-1","200-3","213-5","203-8"]);
+  const grid = document.getElementById('lojasGrid');
+  lojas.forEach(l => {
+    const div = document.createElement('div');
+    div.className = 'loja-tag' + (separadas.has(l) ? ' separada' : '');
+    div.textContent = l;
+    grid.appendChild(div);
+  });
+</script>
+
+</body>
+</html>
